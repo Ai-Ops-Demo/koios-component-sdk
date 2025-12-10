@@ -1,0 +1,194 @@
+{
+  "name": "Regression Analyzer",
+  "version": "1.0.0",
+  "author": "Koios SDK Example",
+  "description": "Regression analysis component comparing data against baseline model with anomaly detection",
+  "category": "processing",
+  "koios_version_min": "1.0.0",
+  "entry_point": "component.RegressionAnalyzer",
+  "dependencies": [],
+  "parameters": {
+    "baseline_slope": {
+      "type": "float",
+      "description": "Slope of the baseline regression model (y = slope * x + intercept)",
+      "required": false,
+      "default": 1.0
+    },
+    "baseline_intercept": {
+      "type": "float",
+      "description": "Intercept of the baseline regression model",
+      "required": false,
+      "default": 0.0
+    },
+    "baseline_r_squared": {
+      "type": "float",
+      "description": "R-squared value of the baseline model (for comparison)",
+      "required": false,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    },
+    "use_koios_history": {
+      "type": "boolean",
+      "description": "If true, fetch historical data from Koios tags; if false, use internal history",
+      "required": false,
+      "default": false
+    },
+    "history_window_size": {
+      "type": "integer",
+      "description": "Maximum number of data points to keep in history",
+      "required": false,
+      "default": 100,
+      "validation": {
+        "minimum": 10,
+        "maximum": 10000
+      }
+    },
+    "min_samples_for_analysis": {
+      "type": "integer",
+      "description": "Minimum number of samples required before performing regression analysis",
+      "required": false,
+      "default": 10,
+      "validation": {
+        "minimum": 3
+      }
+    },
+    "deviation_threshold": {
+      "type": "float",
+      "description": "Number of standard deviations for anomaly detection",
+      "required": false,
+      "default": 2.0,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "rmse_threshold": {
+      "type": "float",
+      "description": "Root Mean Square Error threshold for anomaly detection (null to disable)",
+      "required": false,
+      "default": null,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "mae_threshold": {
+      "type": "float",
+      "description": "Mean Absolute Error threshold for anomaly detection (null to disable)",
+      "required": false,
+      "default": null,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "buffer_size": {
+      "type": "integer",
+      "description": "Size of input/output buffers",
+      "required": false,
+      "default": 1000,
+      "validation": {
+        "minimum": 10
+      }
+    },
+    "batch_size": {
+      "type": "integer",
+      "description": "Number of data points to process per batch",
+      "required": false,
+      "default": 1,
+      "validation": {
+        "minimum": 1
+      }
+    },
+    "processing_interval": {
+      "type": "float",
+      "description": "Processing interval in seconds",
+      "required": false,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.1
+      }
+    }
+  },
+  "bindings": {
+    "inputs": [
+      {
+        "name": "input_x",
+        "tag": "regression_input_x",
+        "description": "Independent variable (X) input - can be current value or historical data from Koios"
+      },
+      {
+        "name": "input_y",
+        "tag": "regression_input_y",
+        "description": "Dependent variable (Y) input - can be current value or historical data from Koios"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "current_slope",
+        "tag": "regression_current_slope",
+        "description": "Current calculated regression slope"
+      },
+      {
+        "name": "current_intercept",
+        "tag": "regression_current_intercept",
+        "description": "Current calculated regression intercept"
+      },
+      {
+        "name": "r_squared",
+        "tag": "regression_r_squared",
+        "description": "R-squared value of current regression model"
+      },
+      {
+        "name": "rmse",
+        "tag": "regression_rmse",
+        "description": "Root Mean Square Error of current regression"
+      },
+      {
+        "name": "mae",
+        "tag": "regression_mae",
+        "description": "Mean Absolute Error of current regression"
+      },
+      {
+        "name": "anomaly_count",
+        "tag": "regression_anomaly_count",
+        "description": "Number of anomalies detected in current analysis"
+      },
+      {
+        "name": "slope_deviation",
+        "tag": "regression_slope_deviation",
+        "description": "Deviation of current slope from baseline"
+      },
+      {
+        "name": "intercept_deviation",
+        "tag": "regression_intercept_deviation",
+        "description": "Deviation of current intercept from baseline"
+      },
+      {
+        "name": "analysis_status",
+        "tag": "regression_analysis_status",
+        "description": "Status of the analysis (success, insufficient_data, error)"
+      }
+    ]
+  },
+  "tags": ["regression", "analysis", "statistics", "anomaly-detection", "baseline", "data-processing"],
+  "license": "MIT",
+  "documentation": {
+    "readme": "README.md"
+  },
+  "testing": {
+    "test_scenarios": [
+      "startup",
+      "baseline_comparison",
+      "anomaly_detection",
+      "insufficient_data",
+      "koios_history_mode",
+      "internal_history_mode"
+    ],
+    "mock_tags": {
+      "regression_input_x": 10.0,
+      "regression_input_y": 10.0
+    }
+  }
+}
+

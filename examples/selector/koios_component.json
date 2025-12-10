@@ -1,0 +1,123 @@
+{
+  "name": "Selector",
+  "version": "1.0.0",
+  "author": "Koios SDK Example",
+  "description": "Selector/multiplexer component that passes through selected input channel based on selector value",
+  "category": "logic",
+  "koios_version_min": "1.0.0",
+  "entry_point": "component.Selector",
+  "dependencies": [],
+  "parameters": {
+    "num_inputs": {
+      "type": "integer",
+      "description": "Number of input channels (input_1, input_2, ..., input_N)",
+      "required": false,
+      "default": 3,
+      "validation": {
+        "minimum": 2,
+        "maximum": 32
+      }
+    },
+    "default_output": {
+      "type": "float",
+      "description": "Default output value when selector is invalid or input is missing",
+      "required": false,
+      "default": 0.0
+    },
+    "hold_last_valid": {
+      "type": "boolean",
+      "description": "If true, hold last valid output when selector is invalid; if false, use default_output",
+      "required": false,
+      "default": false
+    },
+    "selector_input_name": {
+      "type": "string",
+      "description": "Name of the input tag for the selector value",
+      "required": false,
+      "default": "selector"
+    },
+    "evaluation_interval": {
+      "type": "float",
+      "description": "Logic evaluation interval in seconds",
+      "required": false,
+      "default": 0.1,
+      "validation": {
+        "minimum": 0.01
+      }
+    }
+  },
+  "bindings": {
+    "inputs": [
+      {
+        "name": "selector",
+        "tag": "selector_input",
+        "description": "Selector value (1, 2, 3, etc.) determining which input channel to pass through"
+      },
+      {
+        "name": "input_1",
+        "tag": "selector_input_1",
+        "description": "Input channel 1"
+      },
+      {
+        "name": "input_2",
+        "tag": "selector_input_2",
+        "description": "Input channel 2"
+      },
+      {
+        "name": "input_3",
+        "tag": "selector_input_3",
+        "description": "Input channel 3"
+      },
+      {
+        "name": "input_4",
+        "tag": "selector_input_4",
+        "description": "Input channel 4"
+      },
+      {
+        "name": "input_5",
+        "tag": "selector_input_5",
+        "description": "Input channel 5"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output",
+        "tag": "selector_output",
+        "description": "Selected output value (from the channel specified by selector)"
+      },
+      {
+        "name": "selected_channel",
+        "tag": "selector_selected_channel",
+        "description": "Currently selected channel number (1-based, null if invalid)"
+      },
+      {
+        "name": "selection_valid",
+        "tag": "selector_selection_valid",
+        "description": "Boolean indicating if current selection is valid"
+      }
+    ]
+  },
+  "tags": ["selector", "multiplexer", "mux", "logic", "routing", "switching"],
+  "license": "MIT",
+  "documentation": {
+    "readme": "README.md"
+  },
+  "testing": {
+    "test_scenarios": [
+      "startup",
+      "valid_selection",
+      "invalid_selection",
+      "missing_input",
+      "hold_last_valid",
+      "channel_switching",
+      "multiple_channels"
+    ],
+    "mock_tags": {
+      "selector_input": 1,
+      "selector_input_1": 10.0,
+      "selector_input_2": 20.0,
+      "selector_input_3": 30.0
+    }
+  }
+}
+
