@@ -255,6 +255,9 @@ koios-component build ./my_component --output ./packages
 
 # Build with compression
 koios-component build ./my_component --compress
+
+# Build with dependency validation against runtime requirements
+koios-component build ./my_component --runtime-requirements ./docs/runtime-available.txt
 ```
 
 ### Deployment
@@ -375,6 +378,72 @@ Access examples:
 koios-component examples --category control
 koios-component examples --list-all
 ```
+
+## 🌐 Runtime Environment
+
+Components execute in a controlled runtime environment with pre-installed packages. Understanding what's available helps you build components that work seamlessly.
+
+### Available Packages
+
+The runtime environment includes a curated set of public Python packages. See [`docs/runtime-available.txt`](docs/runtime-available.txt) for the complete list with version ranges.
+
+**Key packages include:**
+- **Async & Networking**: `aiohttp`, `httpx`, `anyio`
+- **Database**: `SQLAlchemy`, `psycopg` (PostgreSQL)
+- **Utilities**: `python-dateutil`, `pytz`, `python-dotenv`
+- **Data Structures**: `sortedcontainers`, `multidict`
+- **And more...**
+
+### SDK Library
+
+The **`koios_component_sdk`** library is part of the SDK itself and is automatically available to all components. It provides base classes, decorators, and utilities for component development.
+
+### Standard Library
+
+All Python standard library modules are available (`os`, `sys`, `json`, `logging`, `datetime`, `asyncio`, etc.).
+
+### Dependency Validation
+
+When building components, you can validate imports against available runtime packages:
+
+```bash
+koios-component build ./my_component --runtime-requirements ./docs/runtime-available.txt
+```
+
+This will:
+- ✅ Check that all imports are available in the runtime
+- ⚠️ Warn about dependencies declared but not in runtime-available.txt
+- ❌ Error on imports that aren't available and not declared
+
+### Adding New Packages
+
+**⚠️ Important**: If your component requires a public library that's not in `runtime-available.txt`, you must submit a **formal approval request** before deployment.
+
+**Approval Process:**
+
+1. **Check Availability**: First verify the package isn't already available or can't be replaced with an existing package
+2. **Submit Request**: Submit a formal request including:
+   - Package name and version requirement
+   - Justification for why it's needed
+   - Security and compatibility assessment
+   - Alternative solutions considered
+3. **Review**: The request will be reviewed for:
+   - Security implications
+   - Compatibility with existing packages
+   - Maintenance burden
+   - Alignment with platform goals
+4. **Approval**: If approved, the package will be added to the runtime environment
+5. **Update**: The `runtime-available.txt` file will be updated accordingly
+
+**Note**: Components using unapproved packages will fail validation and cannot be deployed until approval is granted and the package is added to the runtime.
+
+### Best Practices
+
+1. **Use Available Packages**: Prefer packages already in `runtime-available.txt`
+2. **Declare Dependencies**: Always declare dependencies in `koios_component.json`
+3. **Validate Early**: Run dependency validation during development
+4. **Plan Ahead**: Submit approval requests well before deployment deadlines
+5. **Document Usage**: Explain why specific packages are needed in your component README
 
 ## 🔧 Advanced Features
 

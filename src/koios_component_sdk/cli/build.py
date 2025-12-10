@@ -18,7 +18,10 @@ from ..exceptions import PackagingError
 @click.option('--output', '-o', help='Output directory for package')
 @click.option('--compress/--no-compress', default=True, help='Compress package (default: True)')
 @click.option('--validate/--no-validate', default=True, help='Validate component before building')
-def build_package(component_dir: str, output: str, compress: bool, validate: bool):
+@click.option('--runtime-requirements', type=click.Path(exists=True), 
+              help='Path to runtime-available.txt for dependency validation')
+def build_package(component_dir: str, output: str, compress: bool, validate: bool, 
+                  runtime_requirements: str):
     """
     Build a component package from component directory.
     
@@ -31,7 +34,7 @@ def build_package(component_dir: str, output: str, compress: bool, validate: boo
         koios-component build ./my_component --no-compress
     """
     try:
-        package_path = build_package_impl(component_dir, output, compress, validate)
+        package_path = build_package_impl(component_dir, output, compress, validate, runtime_requirements)
         click.echo(f"Package built successfully: {package_path}")
         
     except PackagingError as e:
@@ -43,7 +46,8 @@ def build_package(component_dir: str, output: str, compress: bool, validate: boo
 
 
 def build_package_impl(component_dir: str, output: str = None, 
-                      compress: bool = True, validate: bool = True) -> str:
+                      compress: bool = True, validate: bool = True,
+                      runtime_requirements: str = None) -> str:
     """
     Implementation function for building packages.
     
@@ -52,6 +56,7 @@ def build_package_impl(component_dir: str, output: str = None,
         output: Output directory for package
         compress: Whether to compress package
         validate: Whether to validate before building
+        runtime_requirements: Optional path to runtime-available.txt for dependency validation
         
     Returns:
         Path to created package
@@ -64,7 +69,7 @@ def build_package_impl(component_dir: str, output: str = None,
     # Validate if requested
     if validate:
         click.echo("Validating component...")
-        validation_errors = packager.validate()
+        validation_errors = packager.validate(runtime_requirements_path=runtime_requirements)
         
         if validation_errors:
             click.echo("Validation failed:")

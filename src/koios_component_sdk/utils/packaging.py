@@ -58,9 +58,14 @@ class ComponentPackager:
         except Exception as e:
             raise PackagingError(f"Error loading manifest: {str(e)}")
     
-    def validate(self) -> List[str]:
+    def validate(self, runtime_requirements_path: Optional[str] = None) -> List[str]:
         """
         Validate component structure and files.
+        
+        Args:
+            runtime_requirements_path: Optional path to runtime-available.txt file.
+                                      If provided, validates component imports against
+                                      available runtime packages.
         
         Returns:
             List of validation errors (empty if valid)
@@ -103,11 +108,29 @@ class ComponentPackager:
             else:
                 errors.append(f"Invalid entry point format: {entry_point}")
         
-        # Check dependencies
+        # Check dependencies format
         dependencies = self.manifest.get('dependencies', [])
         for dep in dependencies:
             if not isinstance(dep, str):
                 errors.append(f"Invalid dependency format: {dep}")
+        
+        # Check dependencies against runtime requirements
+        if runtime_requirements_path:
+            from .validation import check_dependencies_against_runtime
+            
+            req_path = Path(runtime_requirements_path)
+            if req_path.exists():
+                warnings, dep_errors = check_dependencies_against_runtime(
+                    self.component_dir,
+                    req_path
+                )
+                errors.extend(dep_errors)
+                # Log warnings (if logger available)
+                if warnings and hasattr(self, 'logger'):
+                    for warning in warnings:
+                        self.logger.warning(warning)
+            else:
+                errors.append(f"Runtime requirements file not found: {runtime_requirements_path}")
         
         return errors
     
