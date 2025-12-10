@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Koios Component SDK
 
 A comprehensive SDK for developing custom components for the Koios industrial automation platform. This SDK provides base classes, utilities, and tools for creating control components, communication protocols, data processors, and logic components that integrate seamlessly with Koios.
@@ -483,3 +484,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Made with ❤️ by [Ai-OPs, Inc.](https://ai-op.com)**
+=======
+# koios-component-sdk
+>>>>>>> 35ea0420160f067b521c82b273a1125e48fbbe87
