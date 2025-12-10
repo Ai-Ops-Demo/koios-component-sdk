@@ -309,7 +309,7 @@ A typical component directory structure:
 my_component/
 ├── koios_component.json    # Component metadata and configuration
 ├── component.py           # Main component implementation
-├── README.md             # Component documentation
+├── README.md             # Component documentation (included in package)
 ├── requirements.txt      # Python dependencies
 ├── tests/               # Component tests
 │   ├── __init__.py
@@ -318,6 +318,21 @@ my_component/
 └── examples/            # Usage examples
     └── basic_usage.py
 ```
+
+### Documentation Files
+
+**Best Practice**: Always include markdown (`.md`) files in your component package. These files are automatically extracted during package upload and can be viewed directly from the Koios web interface once the component is imported.
+
+![Component Documentation View](docs/images/component-documentation.png)
+
+Markdown files are useful for:
+- **README.md**: Main component documentation, usage examples, and API reference
+- **CHANGELOG.md**: Version history and change notes
+- **INSTALLATION.md**: Setup and configuration instructions
+- **TROUBLESHOOTING.md**: Common issues and solutions
+- Any other documentation files that help users understand and use your component
+
+When you upload a component package through the Koios web interface, all `.md` files in the package are automatically extracted and made available for viewing. This provides users with immediate access to documentation without needing to download or extract the package.
 
 ### Component Manifest (`koios_component.json`)
 
@@ -466,6 +481,11 @@ This will:
 3. **Validate Early**: Run dependency validation during development
 4. **Plan Ahead**: Submit approval requests well before deployment deadlines
 5. **Document Usage**: Explain why specific packages are needed in your component README
+6. **Include Documentation**: Always include markdown (`.md`) files in your component package - these are automatically extracted and viewable in the Koios web interface after import
+
+    ![Component Documentation View](docs/images/component-documentation.png)
+    
+    The documentation is displayed with syntax highlighting, table of contents, and searchable headers, making it easy for users to understand and use your component.
 
 ## 🔧 Advanced Features
 
