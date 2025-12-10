@@ -261,6 +261,26 @@ koios-component build ./my_component --runtime-requirements ./docs/runtime-avail
 ```
 
 ### Deployment
+
+**Note**: The `deploy` command is only available for Koios instances that have the deployment feature enabled. For most Koios installations, component packages should be uploaded through the web interface.
+
+#### Web Interface Upload (Recommended)
+
+The Koios user interface provides a managed Package Upload process for uploading component packages:
+
+![Components Dashboard](docs/images/components-dashboard.png)
+
+To upload a component package:
+
+1. Navigate to the **Components** section in the Koios web interface
+2. Click the **"↑ Upload New Package"** button
+3. Select your `.kcp` package file
+4. The package will be validated and installed automatically
+
+#### CLI Deployment (Advanced)
+
+For Koios instances with CLI deployment enabled:
+
 ```bash
 # Deploy to Koios server
 koios-component deploy my_component-1.0.0.kcp --host https://koios.example.com
@@ -269,6 +289,8 @@ koios-component deploy my_component-1.0.0.kcp --host https://koios.example.com
 koios-component login --host koios.example.com --username admin
 koios-component deploy my_component-1.0.0.kcp
 ```
+
+**Note**: If the `deploy` command is not available or fails, use the web interface upload method instead.
 
 ### Development Mode
 ```bash
