@@ -1,0 +1,183 @@
+{
+  "name": "Advanced PID Controller",
+  "version": "1.0.0",
+  "author": "Koios SDK Example",
+  "description": "Advanced PID controller with anti-windup, derivative filtering, and gain scheduling",
+  "category": "control",
+  "koios_version_min": "1.0.0",
+  "entry_point": "component.AdvancedPIDController",
+  "dependencies": [],
+  "parameters": {
+    "kp": {
+      "type": "float",
+      "description": "Proportional gain",
+      "required": true,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "ki": {
+      "type": "float",
+      "description": "Integral gain",
+      "required": true,
+      "default": 0.1,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "kd": {
+      "type": "float",
+      "description": "Derivative gain",
+      "required": true,
+      "default": 0.01,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "sample_time": {
+      "type": "float",
+      "description": "Control loop sample time in seconds",
+      "required": false,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.01,
+        "maximum": 3600
+      }
+    },
+    "output_min": {
+      "type": "float",
+      "description": "Minimum output value",
+      "required": false,
+      "default": 0.0
+    },
+    "output_max": {
+      "type": "float",
+      "description": "Maximum output value",
+      "required": false,
+      "default": 100.0
+    },
+    "integral_min": {
+      "type": "float",
+      "description": "Minimum integral term value for anti-windup",
+      "required": false,
+      "default": -100.0
+    },
+    "integral_max": {
+      "type": "float",
+      "description": "Maximum integral term value for anti-windup",
+      "required": false,
+      "default": 100.0
+    },
+    "derivative_filter_time": {
+      "type": "float",
+      "description": "Derivative filter time constant in seconds",
+      "required": false,
+      "default": 0.1,
+      "validation": {
+        "minimum": 0.001
+      }
+    },
+    "output_rate_limit": {
+      "type": "float",
+      "description": "Maximum output change rate per second (null for no limit)",
+      "required": false,
+      "default": null,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "gain_schedule_enabled": {
+      "type": "boolean",
+      "description": "Enable gain scheduling based on process variable",
+      "required": false,
+      "default": false
+    },
+    "gain_schedule_points": {
+      "type": "json",
+      "description": "Gain scheduling points as array of [pv, kp_multiplier, ki_multiplier, kd_multiplier]",
+      "required": false,
+      "default": [],
+      "validation": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "bindings": {
+    "inputs": [
+      {
+        "name": "setpoint",
+        "tag": "pid_setpoint",
+        "description": "Control setpoint value"
+      },
+      {
+        "name": "process_variable",
+        "tag": "pid_process_variable", 
+        "description": "Process variable (measured value)"
+      },
+      {
+        "name": "manual_mode",
+        "tag": "pid_manual_mode",
+        "description": "Manual/automatic mode selection"
+      },
+      {
+        "name": "manual_output",
+        "tag": "pid_manual_output",
+        "description": "Manual output value when in manual mode"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output",
+        "tag": "pid_output",
+        "description": "Control output value"
+      },
+      {
+        "name": "error",
+        "tag": "pid_error",
+        "description": "Current control error (setpoint - process_variable)"
+      },
+      {
+        "name": "integral_term",
+        "tag": "pid_integral_term",
+        "description": "Integral term value for monitoring"
+      },
+      {
+        "name": "derivative_term",
+        "tag": "pid_derivative_term",
+        "description": "Derivative term value for monitoring"
+      }
+    ]
+  },
+  "tags": ["pid", "control", "advanced", "anti-windup", "gain-scheduling"],
+  "license": "MIT",
+  "documentation": {
+    "readme": "README.md",
+    "examples": ["basic_usage.py", "gain_scheduling_example.py"],
+    "api_reference": "https://docs.ai-op.com/components/advanced-pid"
+  },
+  "testing": {
+    "test_scenarios": [
+      "startup",
+      "setpoint_change",
+      "disturbance_rejection",
+      "gain_scheduling",
+      "manual_mode",
+      "windup_protection"
+    ],
+    "mock_tags": {
+      "pid_setpoint": 50.0,
+      "pid_process_variable": 45.0,
+      "pid_manual_mode": false,
+      "pid_manual_output": 0.0
+    }
+  }
+}
