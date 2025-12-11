@@ -98,11 +98,32 @@ class ComponentPackager:
                         spec = importlib.util.spec_from_file_location(module_name, module_path)
                         if spec and spec.loader:
                             module = importlib.util.module_from_spec(spec)
-                            spec.loader.exec_module(module)
                             
-                            # Check if class exists
-                            if not hasattr(module, class_name):
-                                errors.append(f"Entry point class not found: {class_name}")
+                            # Register the module in sys.modules BEFORE executing it
+                            # This is required for dataclass decorator and other features that need to access the module
+                            sys.modules[module_name] = module
+                            
+                            # Add SDK source directory to sys.path so koios_component_sdk can be imported
+                            sdk_src_path = Path(__file__).parent.parent.parent.parent / "src"
+                            if sdk_src_path.exists() and str(sdk_src_path) not in sys.path:
+                                sys.path.insert(0, str(sdk_src_path))
+                                sdk_path_added = True
+                            else:
+                                sdk_path_added = False
+                            
+                            try:
+                                spec.loader.exec_module(module)
+                                
+                                # Check if class exists
+                                if not hasattr(module, class_name):
+                                    errors.append(f"Entry point class not found: {class_name}")
+                            finally:
+                                # Clean up sys.path
+                                if sdk_path_added and str(sdk_src_path) in sys.path:
+                                    sys.path.remove(str(sdk_src_path))
+                                # Clean up sys.modules entry if we added it
+                                if module_name in sys.modules and sys.modules[module_name] is module:
+                                    del sys.modules[module_name]
                     except Exception as e:
                         errors.append(f"Error validating entry point: {str(e)}")
             else:
@@ -139,7 +160,7 @@ class ComponentPackager:
         Build component package.
         
         Args:
-            output_dir: Output directory for package (default: component parent dir)
+            output_dir: Output directory for package (default: component directory)
             compress: Whether to compress the package
             
         Returns:
@@ -154,12 +175,22 @@ class ComponentPackager:
         if output_dir:
             output_path = Path(output_dir)
         else:
-            output_path = self.component_dir.parent
+            # Place package directly in component directory
+            output_path = self.component_dir
         
         output_path.mkdir(parents=True, exist_ok=True)
         
         # Create package filename
-        name = self.manifest['name'].replace(' ', '_').lower()
+        # Sanitize name: replace spaces and special characters with underscores
+        name = self.manifest['name'].replace(' ', '_').replace('/', '_').replace('\\', '_')
+        # Remove any other invalid filename characters
+        invalid_chars = '<>:"|?*'
+        for char in invalid_chars:
+            name = name.replace(char, '_')
+        # Collapse multiple underscores and convert to lowercase
+        while '__' in name:
+            name = name.replace('__', '_')
+        name = name.strip('_').lower()
         version = self.manifest['version']
         package_filename = f"{name}-{version}.kcp"
         package_path = output_path / package_filename

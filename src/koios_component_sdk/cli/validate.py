@@ -255,31 +255,83 @@ def _validate_entry_point(component_path: Path, entry_point: str) -> list:
             
             module = importlib.util.module_from_spec(spec)
             
+            # Register the module in sys.modules BEFORE executing it
+            # This is required for dataclass decorator and other features that need to access the module
+            sys.modules[module_name] = module
+            
+            # Add SDK source directory to sys.path so koios_component_sdk can be imported
+            # Find the SDK source directory (src/koios_component_sdk)
+            sdk_src_path = Path(__file__).parent.parent.parent.parent / "src"
+            if sdk_src_path.exists() and str(sdk_src_path) not in sys.path:
+                sys.path.insert(0, str(sdk_src_path))
+                sdk_path_added = True
+            else:
+                sdk_path_added = False
+            
             # Add component directory to sys.path temporarily
             sys.path.insert(0, str(component_path))
             try:
-                spec.loader.exec_module(module)
+                try:
+                    spec.loader.exec_module(module)
+                except Exception as module_error:
+                    errors.append(f"Error executing module {module_name}: {str(module_error)}")
+                    return errors
             finally:
                 if str(component_path) in sys.path:
                     sys.path.remove(str(component_path))
+                if sdk_path_added and str(sdk_src_path) in sys.path:
+                    sys.path.remove(str(sdk_src_path))
+                # Clean up sys.modules entry if we added it
+                if module_name in sys.modules and sys.modules[module_name] is module:
+                    del sys.modules[module_name]
             
             # Check if class exists
             if not hasattr(module, class_name):
                 errors.append(f"Entry point class not found: {class_name}")
+                # List available attributes for debugging
+                available = [attr for attr in dir(module) if not attr.startswith('_')]
+                if available:
+                    errors.append(f"Available classes/objects in module: {', '.join(available[:10])}")
                 return errors
             
             # Check if class is a valid component
-            component_class = getattr(module, class_name)
+            try:
+                component_class = getattr(module, class_name)
+            except AttributeError:
+                errors.append(f"Entry point class {class_name} not found in module")
+                return errors
             
-            # Basic checks
-            if not hasattr(component_class, 'metadata'):
-                errors.append(f"Component class {class_name} missing 'metadata' property")
+            if component_class is None:
+                errors.append(f"Entry point class {class_name} is None")
+                return errors
             
-            if not hasattr(component_class, 'parameter_definitions'):
-                errors.append(f"Component class {class_name} missing 'parameter_definitions' property")
+            # Verify component_class is actually a class/type
+            if not isinstance(component_class, type):
+                errors.append(f"Entry point {class_name} is not a class (got {type(component_class).__name__})")
+                return errors
             
-            if not hasattr(component_class, 'execute'):
-                errors.append(f"Component class {class_name} missing 'execute' method")
+            # Basic checks with error handling - use getattr with default instead of hasattr
+            # to avoid potential __dict__ access issues
+            try:
+                metadata = getattr(component_class, 'metadata', None)
+                if metadata is None:
+                    errors.append(f"Component class {class_name} missing 'metadata' property")
+            except Exception as e:
+                errors.append(f"Error accessing 'metadata' property: {str(e)}")
+            
+            try:
+                param_defs = getattr(component_class, 'parameter_definitions', None)
+                if param_defs is None:
+                    errors.append(f"Component class {class_name} missing 'parameter_definitions' property")
+            except Exception as e:
+                errors.append(f"Error accessing 'parameter_definitions' property: {str(e)}")
+            
+            try:
+                execute_method = getattr(component_class, 'execute', None)
+                if execute_method is None:
+                    errors.append(f"Component class {class_name} missing 'execute' method")
+            except Exception as e:
+                errors.append(f"Error accessing 'execute' method: {str(e)}")
             
         except ImportError as e:
             errors.append(f"Import error in entry point: {str(e)}")

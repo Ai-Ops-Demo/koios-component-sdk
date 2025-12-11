@@ -178,20 +178,60 @@ def _load_component_class(component_path: Path, manifest: dict):
         
         module = importlib.util.module_from_spec(spec)
         
+        # Register the module in sys.modules BEFORE executing it
+        # This is required for dataclass decorator and other features that need to access the module
+        sys.modules[module_name] = module
+        
+        # Add SDK source directory to sys.path so koios_component_sdk can be imported
+        # Find the SDK source directory (src/koios_component_sdk)
+        sdk_src_path = Path(__file__).parent.parent.parent.parent / "src"
+        if sdk_src_path.exists() and str(sdk_src_path) not in sys.path:
+            sys.path.insert(0, str(sdk_src_path))
+            sdk_path_added = True
+        else:
+            sdk_path_added = False
+        
         # Add component directory to sys.path temporarily
         sys.path.insert(0, str(component_path))
         try:
-            spec.loader.exec_module(module)
+            try:
+                spec.loader.exec_module(module)
+            except Exception as module_error:
+                # Log the error for debugging
+                import traceback
+                error_msg = f"Error executing module {module_name}: {str(module_error)}\n{traceback.format_exc()}"
+                print(f"DEBUG: {error_msg}", file=sys.stderr)
+                return None
         finally:
-            sys.path.remove(str(component_path))
+            if str(component_path) in sys.path:
+                sys.path.remove(str(component_path))
+            if sdk_path_added and str(sdk_src_path) in sys.path:
+                sys.path.remove(str(sdk_src_path))
+            # Clean up sys.modules entry if we added it
+            if module_name in sys.modules and sys.modules[module_name] is module:
+                del sys.modules[module_name]
         
         # Get component class
         if not hasattr(module, class_name):
+            # List available attributes for debugging
+            available = [attr for attr in dir(module) if not attr.startswith('_')]
+            print(f"DEBUG: Class {class_name} not found. Available: {available[:20]}", file=sys.stderr)
             return None
         
-        return getattr(module, class_name)
+        component_class = getattr(module, class_name, None)
+        if component_class is None:
+            print(f"DEBUG: Class {class_name} is None", file=sys.stderr)
+            return None
         
-    except Exception:
+        if not isinstance(component_class, type):
+            print(f"DEBUG: Class {class_name} is not a type, got {type(component_class)}", file=sys.stderr)
+            return None
+        
+        return component_class
+        
+    except Exception as e:
+        import traceback
+        print(f"DEBUG: Exception in _load_component_class: {str(e)}\n{traceback.format_exc()}", file=sys.stderr)
         return None
 
 

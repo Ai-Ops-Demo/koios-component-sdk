@@ -1,0 +1,214 @@
+{
+  "name": "Endress Hauser ProMag/ProMass Component",
+  "version": "1.0.0",
+  "author": "Koios SDK Example",
+  "description": "Logic block for data input and flow meter analysis using EtherNet/IP communication",
+  "category": "logic",
+  "koios_version_min": "1.0.0",
+  "entry_point": "component.PromassProMagComponent",
+  "dependencies": [],
+  "parameters": {
+    "device_ip": {
+      "type": "string",
+      "description": "IP address of the ProMag/ProMass device",
+      "required": true,
+      "default": "192.168.1.100"
+    },
+    "device_timeout": {
+      "type": "float",
+      "description": "Device communication timeout in seconds",
+      "required": false,
+      "default": 2.0,
+      "validation": {
+        "minimum": 0.1,
+        "maximum": 60.0
+      }
+    },
+    "input_assembly_instance": {
+      "type": "integer",
+      "description": "CIP input assembly instance number",
+      "required": false,
+      "default": 100,
+      "validation": {
+        "minimum": 1
+      }
+    },
+    "output_assembly_instance": {
+      "type": "integer",
+      "description": "CIP output assembly instance number",
+      "required": false,
+      "default": 150,
+      "validation": {
+        "minimum": 1
+      }
+    },
+    "read_interval": {
+      "type": "float",
+      "description": "Interval between device reads in seconds",
+      "required": false,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.1
+      }
+    },
+    "connection_retry_count": {
+      "type": "integer",
+      "description": "Number of connection retry attempts",
+      "required": false,
+      "default": 3,
+      "validation": {
+        "minimum": 0
+      }
+    },
+    "connection_retry_delay": {
+      "type": "float",
+      "description": "Delay between connection retry attempts in seconds",
+      "required": false,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.1
+      }
+    },
+    "mass_flow_min": {
+      "type": "float",
+      "description": "Minimum valid mass flow value",
+      "required": false,
+      "default": 0.0
+    },
+    "mass_flow_max": {
+      "type": "float",
+      "description": "Maximum valid mass flow value",
+      "required": false,
+      "default": 1000.0
+    },
+    "volume_flow_min": {
+      "type": "float",
+      "description": "Minimum valid volume flow value",
+      "required": false,
+      "default": 0.0
+    },
+    "volume_flow_max": {
+      "type": "float",
+      "description": "Maximum valid volume flow value",
+      "required": false,
+      "default": 1000.0
+    },
+    "density_min": {
+      "type": "float",
+      "description": "Minimum valid density value",
+      "required": false,
+      "default": 0.0
+    },
+    "density_max": {
+      "type": "float",
+      "description": "Maximum valid density value",
+      "required": false,
+      "default": 2000.0
+    },
+    "temperature_min": {
+      "type": "float",
+      "description": "Minimum valid temperature value",
+      "required": false,
+      "default": -50.0
+    },
+    "temperature_max": {
+      "type": "float",
+      "description": "Maximum valid temperature value",
+      "required": false,
+      "default": 200.0
+    },
+    "enable_flow_validation": {
+      "type": "boolean",
+      "description": "Enable flow value validation against min/max limits",
+      "required": false,
+      "default": true
+    },
+    "enable_rate_of_change_check": {
+      "type": "boolean",
+      "description": "Enable rate of change validation",
+      "required": false,
+      "default": true
+    },
+    "max_rate_of_change": {
+      "type": "float",
+      "description": "Maximum allowed rate of change (units per second)",
+      "required": false,
+      "default": 100.0,
+      "validation": {
+        "minimum": 0.0
+      }
+    },
+    "evaluation_interval": {
+      "type": "float",
+      "description": "Logic evaluation interval in seconds",
+      "required": false,
+      "default": 1.0,
+      "validation": {
+        "minimum": 0.1
+      }
+    }
+  },
+  "bindings": {
+    "inputs": [
+      {
+        "name": "reset_totalizer",
+        "tag": "promass_reset_totalizer",
+        "description": "Command to reset totalizer (boolean)"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "mass_flow",
+        "tag": "promass_mass_flow",
+        "description": "Mass flow value from device"
+      },
+      {
+        "name": "volume_flow",
+        "tag": "promass_volume_flow",
+        "description": "Volume flow value from device"
+      },
+      {
+        "name": "density",
+        "tag": "promass_density",
+        "description": "Density value from device"
+      },
+      {
+        "name": "temperature",
+        "tag": "promass_temperature",
+        "description": "Temperature value from device"
+      },
+      {
+        "name": "device_status",
+        "tag": "promass_device_status",
+        "description": "Device connection status (CONNECTED, DISCONNECTED, CONNECTION_FAILED, READ_ERROR)"
+      },
+      {
+        "name": "flow_valid",
+        "tag": "promass_flow_valid",
+        "description": "Flow validation status (true if all values within limits)"
+      }
+    ]
+  },
+  "tags": ["flowmeter", "promass", "promag", "endress-hauser", "ethernet-ip", "analysis"],
+  "license": "MIT",
+  "documentation": {
+    "readme": "README.md",
+    "examples": [],
+    "api_reference": "https://docs.ai-op.com/components/promass-promag"
+  },
+  "testing": {
+    "test_scenarios": [
+      "startup",
+      "device_connection",
+      "data_read",
+      "flow_validation",
+      "rate_of_change",
+      "totalizer_reset",
+      "error_handling"
+    ],
+    "mock_tags": {
+      "promass_reset_totalizer": false
+    }
+  }
+}
+
